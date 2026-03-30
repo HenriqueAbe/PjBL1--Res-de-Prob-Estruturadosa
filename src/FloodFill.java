@@ -63,11 +63,14 @@ public class FloodFill {
 
                 if (contadorPixels % INTERVALO_FRAME == 0) {
                     salvarFrame();
+                    salvarImagemFinal();
                 }
                 explorarVizinhos(p.x, p.y);
             }
         }
         salvarFrame();
+        salvarImagemFinal();
+        System.out.println("Imagem final salvado");
         return true;
     }
 
@@ -101,6 +104,14 @@ public class FloodFill {
             ImageIO.write(imagem, "png", new File(nome));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void salvarImagemFinal() {
+        try {
+            ImageIO.write(imagem, "png", new File("src/Resultado_Final.png"));
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar imagem final: " + e.getMessage());
         }
     }
 }
