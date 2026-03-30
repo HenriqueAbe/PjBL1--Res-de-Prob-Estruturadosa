@@ -35,4 +35,12 @@ public class Fila {
     public boolean isEmpty() {
         return first == null;
     }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

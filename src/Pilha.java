@@ -25,4 +25,12 @@ public class Pilha {
     public boolean isEmpty() {
         return top == null;
     }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }
