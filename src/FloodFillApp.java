@@ -2,17 +2,16 @@ import javax.swing.*;
 
 public class FloodFillApp {
     private final String pathOriginal = "src/Retangulo.png";
-    private final String pastaSaida = "output_frames";
-    private FloodFill motor;
+    private FloodFill floodFill;
 
     public FloodFillApp() {
-        this.motor = new FloodFill(pathOriginal, pastaSaida);
+        this.floodFill = new FloodFill(pathOriginal);
     }
 
     public void iniciar() {
         System.out.println("Iniciando processamento e salvando frames...");
-        motor.preparar(60, 100, FloodFill.Modo.PILHA);
-        motor.processarTudo();
+        floodFill.preparar(60, 100, FloodFill.Modo.FILA);
+        floodFill.processarTudo();
 
         System.out.println("Processamento concluído. Iniciando animação...");
         abrirJanela();
@@ -20,7 +19,7 @@ public class FloodFillApp {
 
     private void abrirJanela() {
         JFrame frame = new JFrame("Animação Flood Fill");
-        JanelaAnimacao painel = new JanelaAnimacao(pastaSaida);
+        JanelaAnimacao painel = new JanelaAnimacao("todosFrames");
 
         frame.add(painel);
         frame.setSize(800, 600);

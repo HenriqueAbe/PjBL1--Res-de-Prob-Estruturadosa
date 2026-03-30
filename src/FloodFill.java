@@ -7,7 +7,6 @@ import javax.imageio.ImageIO;
 public class FloodFill {
     public enum Modo { PILHA, FILA }
     private BufferedImage imagem;
-    private String pastaSaida;
     private int corAlvo;
     private int corSubstituta = Color.RED.getRGB();
     private int contadorPixels = 0;
@@ -18,11 +17,10 @@ public class FloodFill {
     private Fila fila;
     private Modo modoAtual;
 
-    public FloodFill(String caminhoOriginal, String pastaSaida) {
-        this.pastaSaida = pastaSaida;
+    public FloodFill(String caminhoOriginal) {
         try {
             this.imagem = ImageIO.read(new File(caminhoOriginal));
-            File pasta = new File(pastaSaida);
+            File pasta = new File("todosFrames");
             if (pasta.exists()) {
                 for (File f : pasta.listFiles()) f.delete();
             }
@@ -37,36 +35,56 @@ public class FloodFill {
         this.corAlvo = imagem.getRGB(x, y);
         if (corAlvo == corSubstituta) return;
 
+        Point pInicial = new Point(x, y);
         if (modo == Modo.PILHA) {
             pilha = new Pilha();
-            pintarEInserir(x, y, pilha);
+            pilha.push(pInicial);
         } else {
             fila = new Fila();
-            pintarEInserir(x, y, fila);
+            fila.enqueue(pInicial);
         }
     }
 
     public boolean processarTudo() {
         while (true) {
+            Point p;
             if (modoAtual == Modo.PILHA) {
                 if (pilha.isEmpty()) break;
-                Point p = pilha.pop();
-                explorarVizinhos(p.x, p.y, pilha);
+                p = pilha.pop();
             } else {
                 if (fila.isEmpty()) break;
-                Point p = fila.dequeue();
-                explorarVizinhos(p.x, p.y, fila);
+                p = fila.dequeue();
+            }
+
+            if (imagem.getRGB(p.x, p.y) == corAlvo) {
+
+                imagem.setRGB(p.x, p.y, corSubstituta);
+                contadorPixels++;
+
+                if (contadorPixels % INTERVALO_FRAME == 0) {
+                    salvarFrame();
+                }
+                explorarVizinhos(p.x, p.y);
             }
         }
         salvarFrame();
         return true;
     }
 
-    private void explorarVizinhos(int x, int y, Object estrutura) {
-        int[][] vizinhos = {{x+1, y}, {x-1, y}, {x, y+1}, {x, y-1}};
+    private void explorarVizinhos(int x, int y) {
+        int[][] vizinhos = {{x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1}};
+
         for (int[] v : vizinhos) {
-            if (podePintar(v[0], v[1])) {
-                pintarEInserir(v[0], v[1], estrutura);
+            int nx = v[0];
+            int ny = v[1];
+
+            if (podePintar(nx, ny)) {
+                Point novoPonto = new Point(nx, ny);
+                if (modoAtual == Modo.PILHA) {
+                    pilha.push(novoPonto);
+                } else {
+                    fila.enqueue(novoPonto);
+                }
             }
         }
     }
@@ -77,22 +95,9 @@ public class FloodFill {
                 imagem.getRGB(x, y) == corAlvo;
     }
 
-    private void pintarEInserir(int x, int y, Object estrutura) {
-        imagem.setRGB(x, y, corSubstituta);
-        contadorPixels++;
-
-        if (contadorPixels % INTERVALO_FRAME == 0) {
-            salvarFrame();
-        }
-
-        Point p = new Point(x, y);
-        if (estrutura instanceof Pilha) ((Pilha) estrutura).push(p); // push
-        else if (estrutura instanceof Fila) ((Fila) estrutura).enqueue(p);
-    }
-
     private void salvarFrame() {
         try {
-            String nome = String.format("%s/frame_%04d.png", pastaSaida, contadorFrames++);
+            String nome = String.format("todosFrames/frame_%04d.png", contadorFrames++);
             ImageIO.write(imagem, "png", new File(nome));
         } catch (IOException e) {
             e.printStackTrace();
